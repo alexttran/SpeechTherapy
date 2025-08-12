@@ -39,10 +39,6 @@ with a small API layer that proxies requests to the OpenAI API.
    ```
 4. Open http://localhost:3000
 
-## Environment Variables
-- `OPENAI_API_KEY`: Your OpenAI API key (required).
-
-> This MVP uses OpenAI's REST endpoints directly to avoid SDK version drift. If you swap in the official SDK, ensure the methods and model names match your installed version.
 
 ## Privacy & Safety
 - The server never writes audio or text to disk.

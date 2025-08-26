@@ -34,7 +34,8 @@ export default function CoachPanel({
       });
       const json = await resp.json();
       if (json?.error) {
-        setError('Coach API error.');
+        setError(`Coach API error: ${json?.detail || json?.error}`);
+        console.error('Coach API error detail:', json);
       } else {
         onFeedback(json?.content || '');
       }

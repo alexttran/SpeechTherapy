@@ -78,24 +78,25 @@
         setClips(prev => [...prev, { prompt, transcript, feedback: '', durationSec }]);
       }
 
-      function setFeedbackForLast(feedback: string) {
+      function setFeedbackForClip(index: number, feedback: string) {
         setClips(prev => {
-          if (prev.length === 0) return prev;
           const out = [...prev];
-          out[out.length - 1] = { ...out[out.length - 1], feedback };
+          if (index >= 0 && index < out.length) {
+            out[index] = { ...out[index], feedback };
+          }
           return out;
         });
       }
 
-      async function buildRecommendations() {
-        const last = clips[clips.length - 1];
+      async function buildRecommendationsOnce() {
+        const baseline = clips[clips.length - 1];
         const targets = (accent && ACCENT_TO_TARGETS[accent]) || ['r_l', 'th_s', 'i_ii'];
         const resp = await fetch('/api/coach', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            transcript: last?.transcript || '',
-            prompt: last?.prompt || '',
+          transcript: baseline?.transcript || '',
+            prompt: baseline?.prompt || '',
             accent,
             severity,
             ageGroup,
@@ -103,7 +104,8 @@
           })
         });
         const json = await resp.json();
-        const out = (json?.content || 'Focus on a few target sounds. Practice slowly, then increase speed.').split(".").map((s: string) => s.trim()).filter(Boolean).slice(0, 6);
+        const out = (json?.content || '• Focus on a few target sounds.\\n• Practice slowly, then increase speed.')
+         .split(/\\n|•/).map((s: string) => s.trim()).filter(Boolean).slice(0, 6);
         setRecs(out);
       }
 
@@ -131,13 +133,13 @@
       }
 
       useEffect(() => {
-        if (step === 'recommend') {
-          void buildRecommendations();
+        if (step === 'recommend' && recs.length === 0) {
+          void buildRecommendationsOnce();
         }
         if (remaining <= 0 && step !== 'summary') {
           setStep('summary');
         }
-      }, [step, remaining]); // eslint-disable-line
+      }, [step]); // eslint-disable-line
 
       // Assessment prompts based on accent profile
       const reading = useMemo(() => {
@@ -307,25 +309,24 @@
           )}
 
           {step === 'coach' && (
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid gap-6">{/* single column */}
               {clips.length === 0 ? (
                 <div className="p-6 rounded-2xl card">Record something first in previous steps.</div>
               ) : (
-                clips.slice(-2).map((c, idx) => (
-                  <CoachPanel
-                    key={idx}
-                    accent={accent}
-                    severity={severity}
-                    ageGroup={ageGroup}
-                    targets={pairKeys}
-                    prompt={c.prompt}
-                    transcript={c.transcript}
-                    durationSec={c.durationSec}
-                    onFeedback={(fb) => setFeedbackForLast(fb)}
-                  />
-                ))
+                <CoachPanel
+                  key={clips.length - 1}
+                  accent={accent}
+                  severity={severity}
+                  ageGroup={ageGroup}
+                  targets={pairKeys}
+                  prompt={clips[clips.length - 1].prompt}
+                  transcript={clips[clips.length - 1].transcript}
+                  durationSec={clips[clips.length - 1].durationSec}
+                  feedback={clips[clips.length - 1].feedback}
+                  onFeedback={(fb) => setFeedbackForClip(clips.length - 1, fb)}
+                />
               )}
-              <div className="md:col-span-2 flex justify-end">
+              <div className="flex justify-end">
                 <button className="btn" onClick={() => { finishSummary(); setStep('summary'); }}>View Summary</button>
               </div>
             </div>

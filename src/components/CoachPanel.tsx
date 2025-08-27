@@ -11,11 +11,12 @@ interface Props {
   prompt: string;
   transcript: string;
   durationSec: number;
+  feedback?: string;
   onFeedback: (feedback: string) => void;
 }
 
 export default function CoachPanel({
-  accent, severity, ageGroup, targets, prompt, transcript, durationSec, onFeedback
+  accent, severity, ageGroup, targets, prompt, transcript, durationSec, feedback, onFeedback
 }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -61,6 +62,11 @@ export default function CoachPanel({
       <button onClick={getFeedback} className="btn">✨ Get Coaching Feedback</button>
       {loading && <div className="mt-2 text-sm text-gray-300">Thinking...</div>}
       {error && <div className="mt-2 text-sm text-red-300">{error}</div>}
+      {(!loading && !error && (feedback && feedback.trim().length > 0)) && (
+        <div className="mt-3 p-3 rounded-xl bg-black/20 border border-white/10 text-sm whitespace-pre-wrap">
+          {feedback}
+        </div>
+      )}
     </div>
   );
 }

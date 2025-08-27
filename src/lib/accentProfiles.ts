@@ -1,7 +1,7 @@
 // Generalized accent profiles (non-diagnostic, not medical advice).
 // These are common *tendencies* to guide initial targets for intelligibility work.
 // Individuals vary widely.
-import { AccentProfile } from '@/types';
+import { AccentProfile } from '../types';
 
 export const ACCENT_PROFILES: AccentProfile[] = [
   {
